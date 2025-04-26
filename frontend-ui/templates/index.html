@@ -1,0 +1,52 @@
+#index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Solr Search</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    input, button { padding: 8px; font-size: 16px; }
+    ul { margin-top: 20px; padding-left: 20px; }
+    li { margin-bottom: 8px; }
+  </style>
+  <script>
+    async function fetchResults() {
+      const query = document.getElementById("searchBox").value.trim();
+      if (!query) return;
+
+      try {
+        const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+        const results = await response.json();
+
+        let html = "";
+        if (results.length > 0) {
+          results.forEach(doc => {
+            html += `<li><pre>${JSON.stringify(doc, null, 2)}</pre></li>`;
+          });
+        } else {
+          html = "<li>No results found</li>";
+        }
+
+        document.getElementById("results").innerHTML = html;
+      } catch (err) {
+        document.getElementById("results").innerHTML = "<li>Error fetching results</li>";
+        console.error("Fetch failed:", err);
+      }
+    }
+
+    window.onload = function () {
+      document.getElementById("searchBtn").addEventListener("click", fetchResults);
+      document.getElementById("searchBox").addEventListener("keyup", function (e) {
+        if (e.key === "Enter") fetchResults();
+      });
+    };
+  </script>
+</head>
+<body>
+  <h1>SolrCloud Search Interface</h1>
+  <input type="text" id="searchBox" placeholder="Type to search...">
+  <button id="searchBtn">Search</button>
+  <ul id="results"></ul>
+</body>
+</html>
